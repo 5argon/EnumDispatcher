@@ -1,0 +1,8 @@
+{
+    "name": "com.e7.enum-dispatcher",
+    "author": "Sirawat Pitaksarit / 5argon - Exceed7 Experiments",
+    "displayName": "Enum Dispatcher",
+    "version": "0.0.1",
+    "unity": "2018.1",
+    "description": "Flux/Redux-esque event dispatcher that allows you to use any enum as event's label. Supports event payload too!"
+}
