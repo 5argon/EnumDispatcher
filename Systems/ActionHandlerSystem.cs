@@ -5,13 +5,29 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Experimental.PlayerLoop;
 
 namespace E7.EnumDispatcher
 {
+
     /// <summary>
     /// A system which can receive <see cref="DispatchAction"> and turn them into job scheduling on its <see cref="OnUpdate">.
+    /// 
+    /// The system contains `[UpdateAfter(typeof(<see cref="PreLateUpdate">))]`
+    /// Why? It is required so that action dispatched from normal Unity way is immediately handled in the same frame by default. In effect, you cannot add other update order that contains `PlayerLoop` phase because that would throw overspec error.
+    ///     
+    /// 1. You dispatched from `MonoBehaviour`'s Update(), it is in Update phase.
+    /// 2. You dispatched from a running IEnumeratr coroutine, it is in PreLateUpdate phase.
+    /// 
+    /// Therefore the earliest phase that still works with both case would be after PreLateUpdate.
+    /// 
+    /// Note that "after" means IN that phase but after anything else. So now our action handler is able to handle action resulting from a coroutine.
+    /// 
+    /// Also the system contains `[UpdateInGroup(typeof(<see cref="ActionHandlerSystem.ActionHandlerGroup">))]`.
+    // This allows you to place your system after this group. Useful when you want your system to have an intent of "using the action's result".
     /// </summary>
     [UpdateInGroup(typeof(ActionHandlerSystem.ActionHandlerGroup))]
+    [UpdateAfter(typeof(PreLateUpdate))]
     public abstract class ActionHandlerSystem : JobComponentSystem
     {
         /// <summary>
