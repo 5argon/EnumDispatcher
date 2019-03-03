@@ -19,6 +19,10 @@ Google to learn more about benefits of thinking like this.
 - **Payload Key** : You can attach multiple payloads to each action. Because C# do not have dynamic dot notation like JavaScript and I don't want to mess with `dynamic`, you instead use payload key to get the correct payload from an action. Payload Key is also an `enum`.
 - **Flag** : Each action is strictly in one Category, however it could be added multiple Flags. An action from a different Category can be assigned the same Flag. For example you have the action `BackButtonPressed` in multiple Category describing pressing the top corner back button of each scene. You could assign `Back` flag to all of them, then have an action receiver do something whenever any `Back` was dispatched. (Like unloading things, etc.). Flags are instead based on `string` and not an another `enum`. You can define `const string` for them.
 
+## Coding style 
+
+### Declaration and dispatching
+
 Your action declaration may looks like this, along with some simplified usages : 
 
 ```cs
@@ -57,6 +61,53 @@ public class MainMenu
 }
 ```
 
+### Action handling
+
+How to directly check for that exact action with `if` : Use `.Is`.
+
+```cs
+private void OnAction(DispatchAction action)
+{
+    if (action.Is(MusicSelect.Action.SelectSong))
+    {
+        ...
+    }
+    else if(action.Is(MusicSelect.Action.SelectDifficulty))
+    {
+        ...
+    }
+}
+```
+
+How to handle 2 categories at once with `if` and `switch case` : Use `.Category<T>` then use the generic-typed `out` variable with `switch`.
+
+```cs
+private void OnAction(DispatchAction action)
+{
+    if (action.Category<MusicSelect.Action>(out var actMs)) switch (actMs)
+    {
+        case MusicSelect.Action.SelectSong:
+            ...
+    }
+    else if (action.Category<MusicStart.Action>(out var act)) switch (act)
+    {
+        case MusicStart.Action.Begin:
+            ...
+        case MusicStart.Action.BeginEditor:
+            ...
+        case MusicStart.Action.ToggleRivalView:
+            ...
+        case MusicStart.Action.ChangeChartDifficulty:
+            ...
+    }
+
+    ...
+}
+```
+
+
+For how to do it in C# Jobs, please see the `Tests` folder.
+
 ## Why enum? Not string?
 
 - Strings are brittle and annoying.
@@ -65,6 +116,7 @@ public class MainMenu
 - Mass-rename by your IDE tooling.
 - You can use your IDE to easily find all places that dispatch a certain event by searching enum references.
 - Enum can be nested in the class so that dot notation looks nice. It allows you to for example, always name your enum as `Action`, so you don't have to worry about naming conflict. When used, it will looks like `MainMenu.Action.Back`, `ModeSelect.Action.Back` which is quite readable.
+- There is an optimization at compiler level that make it fast with `switch case`. It does not require equality comparing case by case but a jump table instead. If these `enum` were just normal `int` it would generate comparison assembly per case, same goes for `string`. This may matter if your action handling code path is hot. (And maybe being Burst compiled for even better assembly.) 
 
 ## Pain points in doing so
 
