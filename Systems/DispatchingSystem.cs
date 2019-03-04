@@ -1,5 +1,6 @@
 using System;
 using Unity.Entities;
+using UnityEngine;
 
 namespace E7.EnumDispatcher
 {
@@ -31,7 +32,10 @@ namespace E7.EnumDispatcher
         /// <summary>
         /// Dispatch with pre-created action. Use <see cref="DispatchAction.Create{ENUM}(ENUM, (Enum key, object pl)[])"> method to create and cache an action.
         /// </summary>
-        public void Dispatch(DispatchAction da) => DispatchTargets?.Invoke(da);
+        public void Dispatch(DispatchAction da) 
+        {
+            DispatchTargets?.Invoke(da);
+        }
 
         /// <summary>
         /// You could subscribe with any out-of-ECS callback, but remember to <see cref="Unsubscribe(ActionHandlerDelegate)"> as well.

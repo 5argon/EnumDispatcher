@@ -9,7 +9,13 @@ I am bringing this workflow to Unity, but erasing the "string action label" pain
 - Every possible action by user must be represented by action. So in effect, an action cannot cause another action by itself. (So != public methods, which is kinda the "verb" of programming world.)
 - Data can only mutate in response to an action. Then that mutation will cause a presentation change.
 
-Google to learn more about benefits of thinking like this.
+### Benefits in Unity
+
+The "classic" way of handling action in Unity is something like `EventTrigger` will call a `public` method connected in the inspector, as the starting point. Then that object may further connected to other object via exposed variable, it ask the required objects to do something in chain. This **chain** is troubling when it goes on for about 2-3 layers, you started wondering who called this or change the data, and that "who" is not your user.
+
+It is equivalent to "cascade update problem" that Facebook mentioned in their [Flux documentation](https://facebook.github.io/flux/docs/in-depth-overview.html#content).
+
+By only do something in itself based on solely action, you rarely need to chain (public) method calls to tell others to be in sync because others are also handling the action in themselves. Receiving a broadcasted action thanks to callback magic may seems cheating at first, but Unity's connected fields are not that strong either. I think it even became missing and cause bigger problem than callbacks.
 
 ## Terms
 
@@ -34,6 +40,7 @@ public class MainMenu
         ToModeSelect,
         ToCredits,
         TouchedEmptyArea,
+        JoystickMoved,
         [F(Navigation)] LeftButton, //F attribute is short for flags.
         [F(Navigation)] RightButton,
     }
@@ -41,6 +48,8 @@ public class MainMenu
     public enum PayloadKey
     {
         TouchCoordinate,
+        DirectionVector,
+        Weight,
     }
 
     public const string Navigation = nameof(Navigation);
@@ -56,6 +65,16 @@ public class MainMenu
         //With payload (as a tuple of the key and `object`)
         Dispatcher.Dispatch(MainMenu.Action.TouchedEmptyArea, 
             (MainMenu.PayloadKey.TouchCoordinate, new Vector2(100,150))
+        );
+    }
+
+    public void JoystickOnMove()
+    {
+        //Recommended style to enhance readability with multiple payload is to explicitly type `payload:` parameter name.
+        Dispatcher.Dispatch(MainMenu.Action.JobstickMoved, 
+            payload:
+            (MainMenu.PayloadKey.DirectionVector, new Vector2(1,0)),
+            (MainMenu.PayloadKey.Weight, 13)
         );
     }
 }

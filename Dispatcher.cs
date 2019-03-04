@@ -63,5 +63,18 @@ namespace E7.EnumDispatcher
             }
             activeDs.Dispatch(da);
         }
+
+        /// <summary>
+        /// You could subscribe with any out-of-ECS callback, but remember to <see cref="Unsubscribe(ActionHandlerDelegate)"> as well.
+        /// </summary>
+        public static void Subscribe(ActionHandlerDelegate handler) 
+        {
+            Active.Subscribe(handler);
+        }
+
+        /// <summary>
+        /// Does nothing if <see cref="World.Active"> is `null`. It is safe to use this in `OnDestroy` when the game quits.
+        /// </summary>
+        public static void Unsubscribe(ActionHandlerDelegate handler) => Active?.Unsubscribe(handler);
     }
 }

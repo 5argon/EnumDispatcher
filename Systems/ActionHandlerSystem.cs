@@ -13,21 +13,25 @@ namespace E7.EnumDispatcher
     /// <summary>
     /// A system which can receive <see cref="DispatchAction"> and turn them into job scheduling on its <see cref="OnUpdate">.
     /// 
-    /// The system contains `[UpdateAfter(typeof(<see cref="PreLateUpdate">))]`
+    /// The system contains `[UpdateAfter(typeof(<see cref="Update">))]`
     /// Why? It is required so that action dispatched from normal Unity way is immediately handled in the same frame by default. In effect, you cannot add other update order that contains `PlayerLoop` phase because that would throw overspec error.
     ///     
     /// 1. You dispatched from `MonoBehaviour`'s Update(), it is in Update phase.
-    /// 2. You dispatched from a running IEnumeratr coroutine, it is in PreLateUpdate phase.
+    /// 2. You dispatched from a running `IEnumerator` coroutine, it is in *somewhere* IN Update phase, but after all `Update()` of `MonoBehaviour`.
+    /// 3. Something like Animator update is in PreLateUpdate phase. If you use `SetTrigger` for example, it has to be before that or
+    /// it could not consume the trigger in this frame, resulting in 1-frame late.
+    /// [Try this tool to see more what's in each phase](https://gist.github.com/LotteMakesStuff/8534e01043826754344a570a4cf21002).
     /// 
-    /// Therefore the earliest phase that still works with both case would be after PreLateUpdate.
+    /// Therefore the earliest phase that still works with all cases would be **after Update**.
     /// 
-    /// Note that "after" means IN that phase but after anything else. So now our action handler is able to handle action resulting from a coroutine.
+    /// Note that "after" using with Unity's phase, means IN that phase but after everything else.
+    /// You can both receive dispatches from a coroutine, then set animator trigger, then that trigger take effect immediately since it is still before PreLateUpdate.
     /// 
     /// Also the system contains `[UpdateInGroup(typeof(<see cref="ActionHandlerSystem.ActionHandlerGroup">))]`.
-    // This allows you to place your system after this group. Useful when you want your system to have an intent of "using the action's result".
+    /// This allows you to place your system after this group. Useful when you want your system to have an intent of "using the action's result".
     /// </summary>
     [UpdateInGroup(typeof(ActionHandlerSystem.ActionHandlerGroup))]
-    [UpdateAfter(typeof(PreLateUpdate))]
+    [UpdateAfter(typeof(Update))]
     public abstract class ActionHandlerSystem : JobComponentSystem
     {
         /// <summary>
