@@ -6,7 +6,7 @@ namespace E7.EnumDispatcher
 {
     /// <summary>
     /// A system holding `event`. Each <see cref="Dispatch(DispatchAction)"> goes to all receivers of this `event`.
-    /// System like <see cref="ActionHandlerSystem"> is automatically a dispatch subscriber on its <see cref="ScriptBehaviourManager.OnCreateManager">.
+    /// System like <see cref="ActionHandlerSystem"> is automatically a dispatch subscriber on its <see cref="ScriptBehaviourManager.OnCreate">.
     /// </summary>
     public class DispatchingSystem : ComponentSystem
     {
@@ -43,9 +43,9 @@ namespace E7.EnumDispatcher
         public void Subscribe(ActionHandlerDelegate handler) => DispatchTargets += handler;
         public void Unsubscribe(ActionHandlerDelegate handler) => DispatchTargets -= handler;
 
-        protected override void OnCreateManager() 
+        protected override void OnCreate() 
         {
-            base.OnCreateManager();
+            base.OnCreate();
             ETM = EnumTypeManager.Singleton;
             Enabled = false;
         }

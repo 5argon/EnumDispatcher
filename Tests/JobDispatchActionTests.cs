@@ -18,9 +18,9 @@ namespace E7.EnumDispatcher.Tests
         {
             ActionCategory<Magic> magicCategory;
             ActionCategory<Items> itemCategory;
-            protected override void OnCreateManager()
+            protected override void OnCreate()
             {
-                base.OnCreateManager();
+                base.OnCreate();
                 itemCategory = GetActionCategory<Items>();
                 magicCategory = GetActionCategory<Magic>();
             }
@@ -50,7 +50,7 @@ namespace E7.EnumDispatcher.Tests
         [SetUp]
         public void AddHandlerSystem()
         {
-            TAHS = World.CreateManager<TestActionHandlerSystem>();
+            TAHS = World.CreateSystem<TestActionHandlerSystem>();
         }
 
         [Test]

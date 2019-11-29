@@ -5,7 +5,7 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Experimental.PlayerLoop;
+
 
 namespace E7.EnumDispatcher
 {
@@ -31,7 +31,7 @@ namespace E7.EnumDispatcher
     /// This allows you to place your system after this group. Useful when you want your system to have an intent of "using the action's result".
     /// </summary>
     [UpdateInGroup(typeof(ActionHandlerSystem.ActionHandlerGroup))]
-    [UpdateAfter(typeof(Update))]
+    [UpdateAfter(typeof(UnityEngine.PlayerLoop.Update))]
     public abstract class ActionHandlerSystem : JobComponentSystem
     {
         /// <summary>
@@ -45,12 +45,12 @@ namespace E7.EnumDispatcher
         bool created;
 
         /// <summary>
-        /// Please call `base.OnCreateManager()` on your subclass if you have your own override !!
+        /// Please call `base.OnCreate()` on your subclass if you have your own override !!
         /// </summary>
-        protected override void OnCreateManager()
+        protected override void OnCreate()
         {
             ETM = EnumTypeManager.Singleton;
-            DispatchingSystem = World.GetOrCreateManager<DispatchingSystem>();
+            DispatchingSystem = World.GetOrCreateSystem<DispatchingSystem>();
             queuedActions = new Queue<DispatchAction>();
             DispatchingSystem.Subscribe(HandleAction);
             created = true;
@@ -61,7 +61,7 @@ namespace E7.EnumDispatcher
         {
             if(!created)
             {
-                throw new Exception($"ActionHandlerSystem {this.GetType().Name} was not initialized! Did you forget calling `base.OnCreateManager()`?");
+                throw new Exception($"ActionHandlerSystem {this.GetType().Name} was not initialized! Did you forget calling `base.OnCreate()`?");
             }
         }
 #endif
@@ -91,15 +91,16 @@ namespace E7.EnumDispatcher
         /// </summary>
         protected abstract JobHandle OnAction(DispatchAction da, JobHandle jobHandle);
 
-        protected override void OnDestroyManager()
+        protected override void OnDestroy()
         {
             //In the case of world destroying that system might have gone first.
             DispatchingSystem?.Unsubscribe(HandleAction);
         }
 
+
         /// <summary>
-        /// Call this on your ActionHandlerSystem's OnCreateManager.
-        /// Do not dispose ActionCategory, it will be automatically on system's OnDestroyManager.
+        /// Call this on your ActionHandlerSystem's OnCreate.
+        /// Do not dispose ActionCategory, it will be automatically on system's OnDestroy.
         /// </summary>
         protected ActionCategory<ENUM> GetActionCategory<ENUM>() where ENUM : struct, IConvertible
         {

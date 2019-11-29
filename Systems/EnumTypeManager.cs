@@ -40,27 +40,18 @@ namespace E7.EnumDispatcher
                 if (etmWorld == null || etmWorld.IsCreated == false)
                 {
                     etmWorld = new World(etmWorldName);
-                    singletonEtm = etmWorld.GetOrCreateManager<EnumTypeManager>();
-                    PlayerLoopManager.RegisterDomainUnload(DomainUnloadShutdown, 10000);
+                    singletonEtm = etmWorld.GetOrCreateSystem<EnumTypeManager>();
                 }
                 return singletonEtm;
             }
         }
 
-        //If you disabled default world you will be missing this auto dispose
-        //that Unity used in Entities lib.
-        static void DomainUnloadShutdown()
-        {
-            World.DisposeAllWorlds();
-            ScriptBehaviourUpdateOrder.UpdatePlayerLoop();
-        }
-
         //One system will be created per action category. This is to make things static-like while not really static. (Static in a world)
         public EnumTypeManager<T> Category<T>() where T : struct, IConvertible
-        => World.GetOrCreateManager<EnumTypeManager<T>>();
+        => World.GetOrCreateSystem<EnumTypeManager<T>>();
 
         protected override void OnUpdate() { }
-        protected override void OnCreateManager()
+        protected override void OnCreate()
         {
             this.Enabled = false;
         }
@@ -141,14 +132,14 @@ namespace E7.EnumDispatcher
     where T : struct, IConvertible
     {
         EnumTypeManager ETM;
-        protected override void OnCreateManager()
+        protected override void OnCreate()
         {
-            ETM = World.GetOrCreateManager<EnumTypeManager>();
+            ETM = World.GetOrCreateSystem<EnumTypeManager>();
             this.Enabled = false;
         }
 
         bool castMapsGenerated;
-        protected override void OnDestroyManager()
+        protected override void OnDestroy()
         {
             if (castMapsGenerated)
             {

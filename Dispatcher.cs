@@ -8,7 +8,7 @@ namespace E7.EnumDispatcher
 
     /// <summary>
     /// Dispatcher static class access a <see cref="DispatchingSystem"> in your active world.
-    /// System like <see cref="ActionHandlerSystem"> is automatically a dispatch subscriber on its <see cref="ScriptBehaviourManager.OnCreateManager">.
+    /// System like <see cref="ActionHandlerSystem"> is automatically a dispatch subscriber on its <see cref="ScriptBehaviourManager.OnCreate">.
     /// You can also make a <see cref="StateStore{STATE}"> handle action with <see cref="StateStore{STATE}.EnableStoreAction">.
     /// </summary>
     public static class Dispatcher
@@ -17,9 +17,9 @@ namespace E7.EnumDispatcher
         /// Returns `null` when no active world.
         /// </summary>
         /// <value></value>
-        public static DispatchingSystem Active => World.Active == null ? null : Of(World.Active);
+        public static DispatchingSystem Active => World.DefaultGameObjectInjectionWorld == null ? null : Of(World.DefaultGameObjectInjectionWorld);
 
-        public static DispatchingSystem Of(World w) => w.GetOrCreateManager<DispatchingSystem>();
+        public static DispatchingSystem Of(World w) => w.GetOrCreateSystem<DispatchingSystem>();
 
         /// <summary>
         /// Dispatch to a dispatcher of the currently active world.
